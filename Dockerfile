@@ -13,14 +13,12 @@ WORKDIR /usr/src/gproxy
 COPY . .
 RUN cargo build --release
 
-# Runtime stage
-FROM docker.io/library/debian:bookworm-slim
+# Runtime stage - Distroless CC (contains glibc)
+FROM gcr.io/distroless/cc-debian12
 
-# Install runtime dependencies (OpenSSL 3 and CA certificates)
-RUN apt-get update && apt-get install -y \
-    libssl3 \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+# Copy dynamic SSL libraries from builder stage
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libssl.so.3 /usr/lib/x86_64-linux-gnu/libssl.so.3
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libcrypto.so.3 /usr/lib/x86_64-linux-gnu/libcrypto.so.3
 
 # Copy build artifacts and config
 COPY --from=builder /usr/src/gproxy/target/release/gproxy /usr/local/bin/gproxy
@@ -29,4 +27,4 @@ COPY config.yaml /etc/gproxy/config.yaml
 WORKDIR /etc/gproxy
 EXPOSE 8080
 
-CMD ["gproxy"]
+ENTRYPOINT ["/usr/local/bin/gproxy"]
