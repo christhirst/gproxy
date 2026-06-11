@@ -1,0 +1,10 @@
+server:
+  addr: "0.0.0.0:8080"
+  grace_period_sec: 10
+  log_level: "info"
+
+upstream:
+  backends:
+    - "127.0.0.1:50051"
+  tls: false
+  host_header: "localhost"

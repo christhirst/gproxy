@@ -1,0 +1,19 @@
+### Reload Proxy Configuration
+POST http://localhost:8080/_config
+Content-Type: application/json
+
+{
+  "server": {
+    "addr": "0.0.0.0:8080",
+    "grace_period_sec": 10,
+    "log_level": "info"
+  },
+  "upstream": {
+    "backends": [
+      "127.0.0.1:50051",
+      "127.0.0.1:50052"
+    ],
+    "tls": false,
+    "host_header": "localhost"
+  }
+}
