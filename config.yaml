@@ -4,7 +4,21 @@ server:
   log_level: "info"
 
 upstream:
-  backends:
-    - "127.0.0.1:50051"
-  tls: false
-  host_header: "localhost"
+  routes:
+    - path: "/helloworld.Greeter/"
+      backends:
+        - "127.0.0.1:50051"
+      tls: false
+      host_header: "localhost"
+    - path: "/route2.Service/"
+      backends:
+        - "127.0.0.1:50052"
+        - "127.0.0.1:50053"
+      tls: false
+      host_header: "localhost"
+  fallback:
+    path: "/"
+    backends:
+      - "127.0.0.1:50059"
+    tls: false
+    host_header: "localhost"

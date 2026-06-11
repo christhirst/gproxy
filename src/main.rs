@@ -83,26 +83,40 @@ impl ProxyHttp for GrpcProxy {
         Ok(false)
     }
 
-    async fn upstream_peer(&self, _session: &mut Session, _ctx: &mut ()) -> Result<Box<HttpPeer>> {
+    async fn upstream_peer(&self, session: &mut Session, _ctx: &mut ()) -> Result<Box<HttpPeer>> {
+        let path = session.req_header().uri.path();
+        
         let (backend_addr, tls, host_header) = {
             let settings = self.settings.read().map_err(|_| {
                 Error::new_str("Failed to acquire settings read lock")
             })?;
-            let backends = &settings.upstream.backends;
-            if backends.is_empty() {
-                return Err(Error::new_str("No backends configured"));
+            
+            // Find a matching route based on path prefix, otherwise fallback
+            let route = settings.upstream.routes.iter()
+                .find(|r| path.starts_with(&r.path))
+                .or(settings.upstream.fallback.as_ref());
+                
+            match route {
+                Some(r) => {
+                    if r.backends.is_empty() {
+                        return Err(Error::new_str("No backends configured for matched route"));
+                    }
+                    // Round-robin selection of backend
+                    let idx = self.counter.fetch_add(1, Ordering::Relaxed) % r.backends.len();
+                    (
+                        r.backends[idx].clone(),
+                        r.tls,
+                        r.host_header.clone(),
+                    )
+                }
+                None => {
+                    return Err(Error::new_str("No route matched the request path and no fallback was configured"));
+                }
             }
-
-            // Round-robin selection of backend
-            let idx = self.counter.fetch_add(1, Ordering::Relaxed) % backends.len();
-            (
-                backends[idx].clone(),
-                settings.upstream.tls,
-                settings.upstream.host_header.clone(),
-            )
         };
 
         info!(
+            path = %path,
             backend = %backend_addr,
             "Routing gRPC request to backend"
         );

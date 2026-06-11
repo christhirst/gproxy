@@ -9,10 +9,17 @@ pub struct ServerSettings {
 }
 
 #[derive(Debug, Deserialize, Clone)]
-pub struct UpstreamSettings {
+pub struct UpstreamRoute {
+    pub path: String,
     pub backends: Vec<String>,
     pub tls: bool,
     pub host_header: String,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct UpstreamSettings {
+    pub routes: Vec<UpstreamRoute>,
+    pub fallback: Option<UpstreamRoute>,
 }
 
 #[derive(Debug, Deserialize, Clone)]
