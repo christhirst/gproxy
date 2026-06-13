@@ -1,3 +1,12 @@
+### Health Check
+GET http://localhost:8080/health
+
+### Prometheus Metrics
+GET http://localhost:8080/metrics
+
+### Get Current Proxy Configuration
+GET http://localhost:8080/_config
+
 ### Reload Proxy Configuration (Path-Based Routing)
 POST http://localhost:8080/_config
 Content-Type: application/json

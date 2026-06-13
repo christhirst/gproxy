@@ -5,6 +5,8 @@ edition = "2021"
 
 [dependencies]
 pingora = { version = "0.8.1", features = ["proxy", "openssl"] }
+prometheus = { version = "0.13.4", features = ["process"] }
+
 config = { version = "0.14", features = ["yaml"] }
 serde = { version = "1.0", features = ["derive"] }
 tracing = "0.1"

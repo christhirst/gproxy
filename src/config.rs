@@ -1,7 +1,7 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::path::Path;
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct AcmeSettings {
     pub enabled: bool,
     pub domains: Vec<String>,
@@ -21,7 +21,7 @@ fn default_cache_dir() -> String {
     "certs".to_string()
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct TlsSettings {
     pub enabled: bool,
     pub cert_path: Option<String>,
@@ -29,16 +29,17 @@ pub struct TlsSettings {
     pub acme: Option<AcmeSettings>,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct ServerSettings {
     pub addr: String,
     pub grace_period_sec: u64,
     pub log_level: String,
     pub http_addr: Option<String>,
+    pub metrics_addr: Option<String>,
     pub tls: Option<TlsSettings>,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct UpstreamRoute {
     pub path: String,
     pub backends: Vec<String>,
@@ -46,13 +47,13 @@ pub struct UpstreamRoute {
     pub host_header: String,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct UpstreamSettings {
     pub routes: Vec<UpstreamRoute>,
     pub fallback: Option<UpstreamRoute>,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Settings {
     pub server: ServerSettings,
     pub upstream: UpstreamSettings,
