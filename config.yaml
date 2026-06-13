@@ -1,24 +1,43 @@
 server:
-  addr: "0.0.0.0:8080"
-  grace_period_sec: 10
-  log_level: "info"
+    addr: "0.0.0.0:8080"
+    grace_period_sec: 10
+    log_level: "info"
+    http_addr: "0.0.0.0:8081"
+    tls:
+        enabled: false
+        acme:
+            enabled: false
+            domains:
+                - "example.com"
+            email: "admin@example.com"
+            staging: true
+            cache_dir: "certs"
+            # Custom ACME Directory URL (e.g. for internal CAs like Smallstep or Vault).
+            # If specified, it overrides the 'staging' parameter.
+            # directory_url: "https://acme.mycompany.local/acme/acme/directory"
 
 upstream:
-  routes:
-    - path: "/helloworld.Greeter/"
-      backends:
-        - "127.0.0.1:50051"
-      tls: false
-      host_header: "localhost"
-    - path: "/route2.Service/"
-      backends:
-        - "127.0.0.1:50052"
-        - "127.0.0.1:50053"
-      tls: false
-      host_header: "localhost"
-  fallback:
-    path: "/"
-    backends:
-      - "127.0.0.1:50059"
-    tls: false
-    host_header: "localhost"
+    routes:
+        - path: "/depot.Depot/Deposit"
+          backends:
+              - "0.0.0.0:50051"
+          tls: false
+          host_header: "localhost"
+        - path: "/requestsautomation.User/ConfReload"
+          backends:
+              - "127.0.0.1:50052"
+              #- "127.0.0.1:50053"
+          tls: false
+          host_header: "localhost"
+        - path: "/requestsautomation.User"
+          backends:
+              - "127.0.0.1:50053"
+              #- "127.0.0.1:50053"
+          tls: false
+          host_header: "localhost"
+    fallback:
+        path: "/"
+        backends:
+            - "127.0.0.1:50059"
+        tls: false
+        host_header: "localhost"

@@ -1,0 +1,97 @@
+syntax = "proto3";
+
+package depot;
+
+service Depot {
+  rpc Deposit (DepositRequest) returns (TransactionResponse);
+  rpc Withdraw (WithdrawRequest) returns (TransactionResponse);
+  rpc BuyShares (BuyRequest) returns (TransactionResponse);
+  rpc SellShares (SellRequest) returns (TransactionResponse);
+  rpc GetState (Empty) returns (StateResponse);
+  rpc GetGain (Empty) returns (GainResponse);
+  rpc GetShareBalance (StockRequest) returns (ShareBalanceResponse);
+  rpc GetTransactions (StockRequest) returns (TransactionsList);
+  rpc ResetStock (StockRequest) returns (StateResponse);
+  rpc ResetCash (Empty) returns (StateResponse);
+}
+
+message Empty {}
+
+message StockRequest {
+  string symbol = 1;
+}
+
+message DepositRequest {
+  double amount = 1;
+}
+
+message WithdrawRequest {
+  double amount = 1;
+}
+
+message BuyRequest {
+  int32 count = 1;
+  double price_per_share = 2;
+  string symbol = 3;
+}
+
+message SellRequest {
+  int32 count = 1;
+  double price_per_share = 2;
+  string symbol = 3;
+}
+
+message TransactionResponse {
+  bool success = 1;
+  string message = 2;
+  double current_cash = 3;
+  // Deprecated single share count, might remove or keep as total?
+  // Let's keep it as total items for backward compat in the struct, but we really should start returning details.
+  // For now let's just return total shares count as a simple sum if possible, or 0.
+  int32 shares_changed = 4;
+  int32 shares_total = 5;
+}
+
+message StateResponse {
+  double cash = 1;
+  // Total shares count (legacy)
+  repeated ShareDetails shares = 2;
+}
+
+message GainResponse {
+  double total_deposited = 1;
+  double current_cash = 2;
+  double gain = 3;
+}
+
+message ShareDetails {
+  string symbol = 1;
+  int32 count = 2;
+  double price_per_share = 3;
+}
+
+message ShareBalanceResponse {
+  repeated ShareDetails shares = 1;
+}
+
+message TransactionsList {
+  double cash = 1;
+  repeated Transaction transactions = 2;
+}
+
+message Transaction {
+  enum TransactionType {
+    DEPOSIT = 0;
+    WITHDRAW = 1;
+    BUY = 2;
+    SELL = 3;
+  }
+  TransactionType type = 1;
+  double amount = 2;
+  int32 count = 3;
+  double price_per_share = 4;
+  // The difference between the last transaction plus or minus
+  double cash_difference = 5;
+  string symbol = 6;
+  string timestamp = 7;
+}

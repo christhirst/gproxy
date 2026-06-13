@@ -2,10 +2,40 @@ use serde::Deserialize;
 use std::path::Path;
 
 #[derive(Debug, Deserialize, Clone)]
+pub struct AcmeSettings {
+    pub enabled: bool,
+    pub domains: Vec<String>,
+    pub email: String,
+    #[serde(default = "default_staging")]
+    pub staging: bool,
+    #[serde(default = "default_cache_dir")]
+    pub cache_dir: String,
+    pub directory_url: Option<String>,
+}
+
+fn default_staging() -> bool {
+    true
+}
+
+fn default_cache_dir() -> String {
+    "certs".to_string()
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct TlsSettings {
+    pub enabled: bool,
+    pub cert_path: Option<String>,
+    pub key_path: Option<String>,
+    pub acme: Option<AcmeSettings>,
+}
+
+#[derive(Debug, Deserialize, Clone)]
 pub struct ServerSettings {
     pub addr: String,
     pub grace_period_sec: u64,
     pub log_level: String,
+    pub http_addr: Option<String>,
+    pub tls: Option<TlsSettings>,
 }
 
 #[derive(Debug, Deserialize, Clone)]

@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-pingora = { version = "0.8.1", features = ["proxy"] }
+pingora = { version = "0.8.1", features = ["proxy", "openssl"] }
 config = { version = "0.14", features = ["yaml"] }
 serde = { version = "1.0", features = ["derive"] }
 tracing = "0.1"
@@ -12,3 +12,8 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 async-trait = "0.1"
 serde_json = "1.0"
 bytes = "1.0"
+openssl = "0.10"
+instant-acme = "0.8"
+rcgen = "0.14"
+rustls-pki-types = "1"
+tokio = { version = "1", features = ["full"] }

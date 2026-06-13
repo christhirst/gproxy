@@ -1,0 +1,14 @@
+proto < ../proto/usr.proto
+
+### ConfReload
+GRPC localhost:8080/requestsautomation.User/ConfReload
+{
+    "id": "default"
+}
+
+
+### ConfReload
+GRPC localhost:8080/requestsautomation.User/CheckCon
+{
+    "id": "default"
+}

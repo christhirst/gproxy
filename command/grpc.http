@@ -1,0 +1,50 @@
+proto < ../proto/depot.proto
+
+###Deposit
+GRPC localhost:8080/depot.Depot/Deposit
+{"amount": 200.0}
+
+###Withdraw
+GRPC raynkami-balance-server.sliplane.app:50051/Depot/Withdraw
+{"amount": 100.0}
+
+
+### BuyShares
+GRPC raynkami-balance-server.sliplane.app:50051/Depot/BuyShares
+{"count": 10, "pricePerShare": 2.0, "symbol": "AAPL"}
+
+
+
+### SellShares
+GRPC raynkami-balance-server.sliplane.app:50051/Depot/SellShares
+{
+    "count": 5,
+    "pricePerShare": 2.0,
+    "symbol": "AAPL"
+}
+
+
+###GetState
+GRPC raynkami-balance-server.sliplane.app:50051/Depot/GetState
+{}
+
+###GetGain
+GRPC raynkami-balance-server.sliplane.app:50051/Depot/GetGain
+{}
+
+###GetShareBalance
+GRPC raynkami-balance-server.sliplane.app:50051/Depot/GetShareBalance
+{"symbol": "AAPL"}
+
+###GetTransactions
+GRPC raynkami-balance-server.sliplane.app:50051/Depot/GetTransactions
+{"symbol": "AAPL"}
+
+
+###ResetStock
+GRPC raynkami-balance-server.sliplane.app:50051/Depot/ResetStock
+{"symbol": "AAPL"}
+
+###ResetCash
+GRPC raynkami-balance-server.sliplane.app:50051/Depot/ResetCash
+{}
