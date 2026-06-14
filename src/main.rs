@@ -3,6 +3,7 @@ mod config;
 mod error;
 mod proxy;
 mod redirect;
+mod health;
 
 use acme::{load_certs_from_disk, run_acme_worker, DynamicCert};
 use proxy::GrpcProxy;
@@ -11,6 +12,7 @@ use redirect::RedirectProxy;
 use pingora::proxy::http_proxy_service;
 use pingora::server::configuration::Opt;
 use pingora::server::Server;
+use rand::Rng;
 use std::sync::atomic::AtomicUsize;
 use std::sync::{Arc, RwLock};
 use tracing::{info, warn};
@@ -45,9 +47,43 @@ fn main() {
 
     // 4. Create and register the proxy service
     let settings_arc = Arc::new(RwLock::new(settings));
+    let healthy_backends = Arc::new(RwLock::new(HashMap::new()));
+
+    // Spawn background health prober
+    let settings_clone = settings_arc.clone();
+    let healthy_clone = healthy_backends.clone();
+    std::thread::spawn(move || {
+        let rt = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .unwrap();
+        rt.block_on(async {
+            health::run_health_check_worker(settings_clone, healthy_clone).await;
+        });
+    });
+
+    // Resolve OIDC cookie signing secret
+    let cookie_secret: Vec<u8> = {
+        let s = settings_arc.read().unwrap();
+        match &s.server.cookie_secret {
+            Some(b64) => {
+                info!("Using cookie_secret from configuration");
+                b64.as_bytes().to_vec()
+            }
+            None => {
+                info!("No cookie_secret configured — generating random 32-byte secret");
+                let mut buf = [0u8; 32];
+                rand::thread_rng().fill(&mut buf);
+                buf.to_vec()
+            }
+        }
+    };
+
     let proxy = GrpcProxy {
         settings: settings_arc.clone(),
         counter: Arc::new(AtomicUsize::new(0)),
+        healthy_backends: healthy_backends.clone(),
+        cookie_secret,
     };
     let mut proxy_service = http_proxy_service(&server.configuration, proxy);
 

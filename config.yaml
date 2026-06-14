@@ -4,6 +4,9 @@ server:
     log_level: "info"
     http_addr: "0.0.0.0:8081"
     metrics_addr: "0.0.0.0:6192"
+    # Optional base64-encoded secret for signing OIDC session cookies.
+    # If omitted, a random secret is generated on each restart (existing sessions are invalidated).
+    # cookie_secret: "my-super-secret-key-32-bytes-ok"
     tls:
         enabled: false
         acme:
@@ -21,24 +24,57 @@ upstream:
     routes:
         - path: "/depot.Depot/Deposit"
           backends:
-              - "0.0.0.0:50051"
+              - "127.0.0.1:50051"
           tls: false
           host_header: "localhost"
+          health_check: true
+          protocol: "http2"    # gRPC requires http2
         - path: "/requestsautomation.User/ConfReload"
           backends:
               - "127.0.0.1:50052"
               #- "127.0.0.1:50053"
           tls: false
           host_header: "localhost"
+          health_check: true
+          protocol: "http2"
         - path: "/requestsautomation.User"
           backends:
               - "127.0.0.1:50053"
               #- "127.0.0.1:50053"
           tls: false
           host_header: "localhost"
+          health_check: true
+          protocol: "http2"
+        # Example: HTTP/1 backend with OIDC protection
+        # - path: "/webapp"
+        #   backends:
+        #       - "127.0.0.1:3000"
+        #   tls: false
+        #   host_header: "localhost"
+        #   health_check: false
+        #   protocol: "http1"    # HTTP/1.1 backend
+        #   oidc:
+        #       client_id: "my-client-id"
+        #       client_secret: "my-client-secret"
+        #       auth_url: "https://idp.example.com/authorize"
+        #       token_url: "https://idp.example.com/token"
+        #       redirect_uri: "https://myproxy.example.com/_oidc/callback"
+        #       scopes:
+        #           - "openid"
+        #           - "profile"
+        #           - "email"
+        #       attributes:
+        #           - claim: "email"
+        #             header: "X-Auth-Email"
+        #           - claim: "sub"
+        #             header: "X-Auth-Subject"
+        #           - claim: "preferred_username"
+        #             header: "X-Auth-User"
     fallback:
         path: "/"
         backends:
             - "127.0.0.1:50059"
         tls: false
         host_header: "localhost"
+        health_check: true
+        protocol: "http2"
