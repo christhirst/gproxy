@@ -1,4 +1,5 @@
 mod acme;
+mod auth;
 mod config;
 mod error;
 mod proxy;
@@ -12,7 +13,6 @@ use redirect::RedirectProxy;
 use pingora::proxy::http_proxy_service;
 use pingora::server::configuration::Opt;
 use pingora::server::Server;
-use rand::Rng;
 use std::sync::atomic::AtomicUsize;
 use std::sync::{Arc, RwLock};
 use tracing::{info, warn};
@@ -65,18 +65,7 @@ fn main() {
     // Resolve OIDC cookie signing secret
     let cookie_secret: Vec<u8> = {
         let s = settings_arc.read().unwrap();
-        match &s.server.cookie_secret {
-            Some(b64) => {
-                info!("Using cookie_secret from configuration");
-                b64.as_bytes().to_vec()
-            }
-            None => {
-                info!("No cookie_secret configured — generating random 32-byte secret");
-                let mut buf = [0u8; 32];
-                rand::thread_rng().fill(&mut buf);
-                buf.to_vec()
-            }
-        }
+        auth::resolve_cookie_secret(&s)
     };
 
     let proxy = GrpcProxy {
