@@ -1,5 +1,5 @@
 # Build stage
-FROM docker.io/library/rust:1.85-slim AS builder
+FROM docker.io/library/rust:1.91-slim AS builder
 
 # Install build dependencies for Pingora
 RUN apt-get update && apt-get install -y \

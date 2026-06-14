@@ -2,4 +2,4 @@ target/
 .git/
 .github/
 .gitignore
-Cargo.lock
+rust-toolchain.toml
